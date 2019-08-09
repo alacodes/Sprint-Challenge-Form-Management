@@ -2,6 +2,7 @@ import React from 'react';
 import { Field, Form, ErrorMessage, withFormik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
+import './RegForm.css'
 
 class RegForm extends React.Component {
 
@@ -43,8 +44,8 @@ class RegForm extends React.Component {
                 <ErrorMessage name='confirmPassword' component='div' className='invalid-feedback' />
             </div>
             <div className = 'form-group'>
-                <button type='submit' className='btn-primary'>Register/Sign-in</button>
-                <button type='reset' className='btn-reset'>Reset</button>
+                <button type='submit' disabled={this.props.isSubmitting} className='btn-primary'>Register/Sign-in</button>
+                <button type='reset' className='btn-primary'>Reset</button>
             </div>
         </Form>
       )
@@ -52,12 +53,14 @@ class RegForm extends React.Component {
 }
 
 const FormikForm = withFormik({
-    mapPropsToValues({firstName, lastName, username, password}) {
+    mapPropsToValues({firstName, lastName, username, password, email, confirmPassword}) {
         return{
             firstName:firstName || '',
             lastName: lastName || '',
             username: username || '',
-            password: password || ''
+            password: password || '',
+            email: email || '',
+            confirmPassword: confirmPassword || ''
         };
     },
     validationSchema: Yup.object().shape({
@@ -77,17 +80,26 @@ const FormikForm = withFormik({
             .oneOf([Yup.ref('password'), null], 'Passwords must match')
             .required('Please confirm your password')
     }),
-    handleSubmit(values) {
-        console.log(values)
+    handleSubmit(values, {resetForm, setErrors, setSubmitting, setStatus}) {
         axios
             .post('http://localhost:5000/api/register', values)
             .then(results => {
                 console.log(results.data);
+                setStatus(results.data);
                 this.setState(results.data);
             })
             .catch(error => {
                 console.log("Check yourself" + error)
             });
+        setTimeout(() => {
+            if(values.email === 'email@email.email') {
+                setErrors({email: 'That email address is already registered'})
+            } else {
+                resetForm();
+            }
+            setSubmitting(false)
+        }, 1500)
+        console.log(values)
     }
 })(RegForm);
 
