@@ -1,26 +1,41 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Formik, Field, Form as FormikForm, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+  render() {
+    return (
+      <Formik
+        initialValues={{
+          firstName: '',
+          lastName: '',
+          email: '',
+          username: '',
+          password: '',
+          confirmPassword: ''
+        }}
+        validationSchema= {Yup.object().shape({
+          firstName: Yup.string()
+            .required('We need your name, por favor'),
+          lastName: Yup.string()
+            .required('We need your last name, too'),
+          email: Yup.string()
+            .email('Email is invalid')
+            .required('Email is required'),
+          username: Yup.string()
+            .required('Username required'),
+          password: Yup.string()
+            .min(8, 'Password must be at least 8 characters')
+            .required('Password is required'),
+          confirmPassword: Yup.string()
+            .oneOf([Yup.ref('password'), null], 'Passwords must match')
+            .required('Please confirm your password')
+        })}
+        onSubmit={ fields=> {
+          alert('Nice to see you!\n' + JSON.stringify(fields, null, 4))
+        }}
+        
+    )
+  }
 }
-
 export default App;
